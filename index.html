@@ -66,15 +66,25 @@
     <div id="result"></div>
 
     <script>
-        // Auto-insert slashes in expiration date
+        // Auto-insert slashes in expiration date while allowing deletion
         document.getElementById('expiration').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9]/g, '');
-            if (value.length >= 2 && value.length < 4) {
-                e.target.value = value.slice(0, 2) + '/' + value.slice(2);
-            } else if (value.length >= 4) {
-                e.target.value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4, 8);
+            let value = e.target.value.replace(/[^0-9/]/g, ''); // Allow numbers and slashes
+            let cleanValue = value.replace(/\//g, ''); // Digits only for formatting logic
+            let newValue = '';
+            
+            if (cleanValue.length <= 2) {
+                newValue = cleanValue;
+            } else if (cleanValue.length <= 4) {
+                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2);
+            } else if (cleanValue.length <= 8) {
+                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/' + cleanValue.slice(4);
             } else {
-                e.target.value = value;
+                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/' + cleanValue.slice(4, 8);
+            }
+            
+            // Only update if the input is not a deletion (avoids reformatting on backspace)
+            if (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward') {
+                e.target.value = newValue;
             }
         });
 
@@ -124,4 +134,3 @@
     </script>
 </body>
 </html>
-
