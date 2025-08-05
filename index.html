@@ -48,10 +48,9 @@
             font-weight: bold;
             white-space: pre-line;
         }
-        .or-text {
-            text-align: center;
-            margin: 5px 0;
-            color: #555;
+        .indent-container {
+            margin-left: 20px;
+            margin-bottom: 5px;
         }
         input::placeholder {
             color: #aaa;
@@ -69,10 +68,17 @@
     <label for="duration">Duration (days):</label>
     <input type="number" id="duration" step="1">
     
-    <div class="or-text">or</div>
+    <div class="indent-container">
+        <div class="or-text">or</div>
+    </div>
     
     <label for="expiration">Expiration Date:</label>
     <input type="text" id="expiration" placeholder="mm/dd/yyyy" maxlength="10">
+    
+    <div class="indent-container">Optional</div>
+    
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" step="1">
     
     <div class="button-container">
         <button id="calculate-btn" onclick="calculate()">Calculate</button>
@@ -104,6 +110,7 @@
             const margin = parseFloat(document.getElementById('margin').value);
             const duration = parseInt(document.getElementById('duration').value);
             const expiration = document.getElementById('expiration').value;
+            const quantity = parseFloat(document.getElementById('quantity').value);
 
             // Validation: Ensure exactly one of duration or expiration is provided
             if ((isNaN(duration) && !expiration) || (!isNaN(duration) && expiration)) {
@@ -139,15 +146,26 @@
                 return;
             }
 
+            // Calculate Total $ Return if Quantity is provided
+            let totalDollarReturn = 0;
+            if (!isNaN(quantity) && quantity > 0) {
+                totalDollarReturn = quantity * premium;
+            }
+
             const totalReturn = (premium / margin) * 100;
             const weeklyReturn = (premium / margin) * (7 / finalDuration) * 100;
             const annualizedReturn = (premium / margin) * (365 / finalDuration) * 100;
-            document.getElementById('result').innerText = 
+            let output = '';
+            if (totalDollarReturn > 0) {
+                output += `Total $ Return: $${totalDollarReturn.toFixed(2)}\n`;
+            }
+            output += 
                 `Profit: $${premium.toFixed(2)}\n` +
                 `Total Return: ${totalReturn.toFixed(2)}%\n` +
                 `\n` +
                 `Weekly RoR: ${weeklyReturn.toFixed(2)}%\n` +
                 `Annual RoR: ${annualizedReturn.toFixed(2)}%`;
+            document.getElementById('result').innerText = output;
         }
 
         function clearInputs() {
@@ -155,6 +173,7 @@
             document.getElementById('margin').value = '';
             document.getElementById('duration').value = '';
             document.getElementById('expiration').value = '';
+            document.getElementById('quantity').value = '';
             document.getElementById('result').innerText = '';
         }
     </script>
