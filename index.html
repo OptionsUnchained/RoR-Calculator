@@ -68,23 +68,18 @@
     <script>
         // Auto-insert slashes in expiration date while allowing deletion
         document.getElementById('expiration').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9/]/g, ''); // Allow numbers and slashes
-            let cleanValue = value.replace(/\//g, ''); // Digits only for formatting logic
-            let newValue = '';
+            let value = e.target.value;
+            let cleanValue = value.replace(/[^0-9]/g, ''); // Digits only for formatting logic
             
-            if (cleanValue.length <= 2) {
-                newValue = cleanValue;
-            } else if (cleanValue.length <= 4) {
-                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2);
-            } else if (cleanValue.length <= 8) {
-                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/' + cleanValue.slice(4);
-            } else {
-                newValue = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/' + cleanValue.slice(4, 8);
-            }
-            
-            // Only update if the input is not a deletion (avoids reformatting on backspace)
-            if (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward') {
-                e.target.value = newValue;
+            // Only add slashes when typing digits, not on deletion
+            if (e.inputType === 'insertText' && /[0-9]/.test(e.data)) {
+                if (cleanValue.length === 2) {
+                    e.target.value = cleanValue.slice(0, 2) + '/';
+                } else if (cleanValue.length === 4) {
+                    e.target.value = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/';
+                } else if (cleanValue.length > 4) {
+                    e.target.value = cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4) + '/' + cleanValue.slice(4, 8);
+                }
             }
         });
 
@@ -103,9 +98,15 @@
             // Calculate duration from expiration date if provided
             let finalDuration;
             if (expiration) {
+                // Validate mm/dd/yyyy format
+                const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                if (!datePattern.test(expiration)) {
+                    document.getElementById('result').innerText = 'Please enter a valid expiration date in mm/dd/yyyy format.';
+                    return;
+                }
                 const [month, day, year] = expiration.split('/').map(Number);
                 const expDate = new Date(year, month - 1, day);
-                const today = new Date(2025, 7, 5); // August 5, 2025
+                const today = new Date(2025, 7, 5, 13, 37); // August 5, 2025, 1:37 PM PDT
                 if (isNaN(expDate) || expDate <= today) {
                     document.getElementById('result').innerText = 'Please enter a valid future expiration date (mm/dd/yyyy).';
                     return;
