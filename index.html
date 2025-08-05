@@ -145,10 +145,12 @@
                 return;
             }
 
-            // Calculate Total Premium if Quantity is provided
+            // Calculate Total Premium and Total Collateral if Quantity is provided
             let totalPremium = 0;
+            let totalCollateral = 0;
             if (!isNaN(quantity) && quantity > 0) {
                 totalPremium = Math.round(quantity * premium); // No decimals
+                totalCollateral = Math.round(quantity * margin); // No decimals
             }
 
             const totalRoR = (premium / margin) * 100;
@@ -157,6 +159,9 @@
             let output = '';
             if (totalPremium > 0) {
                 output += '<strong>Total Premium:</strong> $' + totalPremium.toLocaleString('en-US') + '\n';
+            }
+            if (totalCollateral > 0) {
+                output += '<strong>Total Collateral:</strong> $' + totalCollateral.toLocaleString('en-US') + '\n';
             }
             output += 
                 '<strong>Total RoR:</strong> ' + totalRoR.toFixed(2) + '%\n' +
