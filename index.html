@@ -101,6 +101,12 @@
 <body>
     <div class="calculator-card">
         <h2>Rate of Return (RoR) Calculator</h2>
+        <label for="stockPrice">Stock Price ($):</label>
+        <input type="number" id="stockPrice" step="0.01" placeholder="Optional">
+        
+        <label for="strikePrice">Strike ($):</label>
+        <input type="number" id="strikePrice" step="0.01" placeholder="Optional">
+        
         <label for="premium">Premium ($):</label>
         <input type="number" id="premium" step="0.01" required>
         
@@ -115,8 +121,8 @@
         <label for="expiration">Expiration Date:</label>
         <input type="text" id="expiration" placeholder="mm/dd/yyyy" maxlength="10">
         
-        <label for="quantity">Quantity (optional):</label>
-        <input type="number" id="quantity" step="1">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" step="1" placeholder="Optional">
         
         <div class="button-container">
             <button id="calculate-btn" onclick="calculate()">Calculate</button>
@@ -145,6 +151,8 @@
         });
 
         function calculate() {
+            const stockPrice = parseFloat(document.getElementById('stockPrice').value) || 0;
+            const strikePrice = parseFloat(document.getElementById('strikePrice').value) || 0;
             const premium = parseFloat(document.getElementById('premium').value);
             const margin = parseFloat(document.getElementById('margin').value);
             const duration = parseInt(document.getElementById('duration').value);
@@ -168,7 +176,7 @@
                 }
                 const [month, day, year] = expiration.split('/').map(Number);
                 const expDate = new Date(year, month - 1, day);
-                const today = new Date(); // Dynamic current date
+                const today = new Date(); // Dynamic current date: 02:53 PM PDT, October 01, 2025
                 if (isNaN(expDate) || expDate <= today) {
                     document.getElementById('result').innerHTML = 'Please enter a valid future expiration date (mm/dd/yyyy).';
                     return;
@@ -196,6 +204,13 @@
             const totalRoR = (premium / margin) * 100;
             const weeklyReturn = (premium / margin) * (7 / finalDuration) * 100;
             const annualizedReturn = (premium / margin) * (365 / finalDuration) * 100;
+
+            // Calculate Cushion if both Stock Price and Strike are provided and positive
+            let cushion = 0;
+            if (stockPrice > 0 && strikePrice > 0) {
+                cushion = ((strikePrice - stockPrice) / stockPrice) * 100;
+            }
+
             let output = '';
             if (totalPremium > 0) {
                 output += '<strong>Total Premium:</strong> $' + totalPremium.toLocaleString('en-US') + '\n';
@@ -207,11 +222,15 @@
                 '<strong>Total RoR:</strong> ' + totalRoR.toFixed(2) + '%\n' +
                 '\n' +
                 '<strong>Weekly RoR:</strong> ' + weeklyReturn.toFixed(2) + '%\n' +
-                '<strong>Annual RoR:</strong> ' + annualizedReturn.toFixed(2) + '%';
+                '<strong>Annual RoR:</strong> ' + annualizedReturn.toFixed(2) + '%\n' +
+                '\n' +
+                '<strong>Cushion:</strong> ' + (cushion !== 0 ? cushion.toFixed(2) + '%' : 'N/A');
             document.getElementById('result').innerHTML = output;
         }
 
         function clearInputs() {
+            document.getElementById('stockPrice').value = '';
+            document.getElementById('strikePrice').value = '';
             document.getElementById('premium').value = '';
             document.getElementById('margin').value = '';
             document.getElementById('duration').value = '';
